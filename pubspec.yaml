@@ -1,6 +1,6 @@
 name: executable
-description: The executable package provides a simple Dart class for dealing with executables. It helps find and check the existence of executables on the system and caches the results for improved performance.
-version: 1.0.2
+description: The executable package simplifies managing executables in Dart. Finds and checks presence, with cached results for improved performance.
+version: 1.0.3
 repository: https://github.com/insign/dart_executable
 homepage: https://github.com/insign/dart_executable
 
