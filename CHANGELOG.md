@@ -1,4 +1,6 @@
-## 1.0.1
+## v1.0.2
+- Support for Dart 3.0.0
+## v1.0.1
 - Dart Pub conventions
-## 1.0.0
+## v1.0.0
 - Initial version.
