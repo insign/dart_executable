@@ -12,3 +12,13 @@ jobs:
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     # with:
     #   working-directory: path/to/package/within/repository
+  notify:
+    if: cancelled() == false
+    runs-on: ubuntu-latest
+    steps:
+    - uses: xinthink/action-telegram@v1.1
+      with:
+        botToken: ${{ secrets.BotToken }}
+        chatId: ${{ secrets.ChatID }}
+        jobStatus: ${{ job.status }}
+        skipSuccess: false
