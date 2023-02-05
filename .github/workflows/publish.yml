@@ -13,12 +13,18 @@ jobs:
     # with:
     #   working-directory: path/to/package/within/repository
   notify:
-    if: cancelled() == false
+    name: Build
     runs-on: ubuntu-latest
     steps:
-    - uses: xinthink/action-telegram@v1.1
-      with:
-        botToken: ${{ secrets.BotToken }}
-        chatId: ${{ secrets.ChatID }}
-        jobStatus: ${{ job.status }}
-        skipSuccess: false
+      - name: send telegram message on push
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.CHAT_ID }}
+          token: ${{ secrets.BOT_TOKEN }}
+          message: |
+            ${{ github.actor }} created commit:
+            Commit message: ${{ github.event.commits[0].message }}
+            
+            Repository: ${{ github.repository }}
+            
+            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
