@@ -3,7 +3,8 @@ name: Publish to pub.dev
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -13,18 +14,12 @@ jobs:
     # with:
     #   working-directory: path/to/package/within/repository
   notify:
-    name: Build
+    name: Notify the commit on Telegram
     runs-on: ubuntu-latest
+    if: always()
+    needs: publish
     steps:
-      - name: send telegram message on push
-        uses: appleboy/telegram-action@master
+      - uses: EverythingSuckz/github-telegram-notify@main
         with:
-          to: ${{ secrets.CHAT_ID }}
-          token: ${{ secrets.BOT_TOKEN }}
-          message: |
-            ${{ github.actor }} created commit:
-            Commit message: ${{ github.event.commits[0].message }}
-            
-            Repository: ${{ github.repository }}
-            
-            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+          bot_token: "${{ secrets.BOT_TOKEN }}"
+          chat_id: "${{ secrets.CHAT_ID }}"
