@@ -1,6 +1,6 @@
 import 'package:executable/executable.dart';
 
-void main()  {
+void main() {
   final cp = Executable('cp');
   if (cp.existsSync()) {
     final path = cp.findSync();
