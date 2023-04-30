@@ -1,6 +1,6 @@
 name: executable
 description: 'The executable package simplifies managing executables in Dart. Finds and checks presence, with cached results for improved performance.'
-version: 1.0.4
+version: 1.1.0
 repository: https://github.com/insign/dart_executable
 homepage: https://github.com/insign/dart_executable
 
@@ -8,7 +8,7 @@ environment:
   sdk: '>=2.17.0 <3.1.0'
 
 dependencies:
-  process_run: ">=0.12.5+2 <0.14.0"
+  process_run: '>=0.12.5+2 <0.14.0'
 
 dev_dependencies:
   lints: ^2.0.0
