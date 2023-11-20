@@ -1,3 +1,5 @@
+## v1.2.3
+- pub upgrade
 ## v1.2.0
 - upgrade dependencies
 ## v1.1.0
