@@ -1,6 +1,6 @@
 name: executable
 description: 'The executable package simplifies managing executables in Dart. Finds and checks presence, with cached results for improved performance.'
-version: 1.4.0
+version: 1.4.1
 repository: https://github.com/insign/dart_executable
 homepage: https://github.com/insign/dart_executable
 

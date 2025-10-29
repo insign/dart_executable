@@ -1,7 +1,7 @@
 /// Support for doing something awesome.
 ///
 /// More dartdocs go here.
-library executable;
+library;
 
 export 'src/executable_base.dart';
 

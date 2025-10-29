@@ -2,10 +2,10 @@
 const name = 'executable';
 const description =
     'The executable package simplifies managing executables in Dart. Finds and checks presence, with cached results for improved performance.';
-const version = '1.4.0';
+const version = '1.4.1';
 const repository = 'https://github.com/insign/dart_executable';
 const homepage = 'https://github.com/insign/dart_executable';
-const environment = '{sdk: >=2.17.0 <3.8.0}';
+const environment = '{sdk: >=3.9.0 <4.0.0}';
 const dependencies = '{process_run: ^1.2.4}';
-const devDependencies = '{lints: ^5.1.1, test: ^1.16.0}';
+const devDependencies = '{lints: ^6.0.0, test: ^1.26.3}';
 const platforms = '{linux: null, macos: null, windows: null}';
