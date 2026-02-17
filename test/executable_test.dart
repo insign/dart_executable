@@ -13,4 +13,16 @@ void main() {
     final result = await ls.find();
     expect(result, isNotNull);
   });
+
+  test('Test ignore cache', () async {
+    final ls = Executable('ls');
+    final result = await ls.find(ignoreCache: true);
+    expect(result, isNotNull);
+    final exists = await ls.exists(ignoreCache: true);
+    expect(exists, true);
+    final resultSync = ls.findSync(ignoreCache: true);
+    expect(resultSync, isNotNull);
+    final existsSync = ls.existsSync(ignoreCache: true);
+    expect(existsSync, true);
+  });
 }
