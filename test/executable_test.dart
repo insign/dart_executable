@@ -13,4 +13,28 @@ void main() {
     final result = await ls.find();
     expect(result, isNotNull);
   });
+
+  test('Test executable existence with ignoreCache', () async {
+    final ls = Executable('ls');
+    final result = await ls.exists(ignoreCache: true);
+    expect(result, true);
+  });
+
+  test('Test executable path with ignoreCache', () async {
+    final ls = Executable('ls');
+    final result = await ls.find(ignoreCache: true);
+    expect(result, isNotNull);
+  });
+
+  test('Test synchronous executable existence with ignoreCache', () {
+    final ls = Executable('ls');
+    final result = ls.existsSync(ignoreCache: true);
+    expect(result, true);
+  });
+
+  test('Test synchronous executable path with ignoreCache', () {
+    final ls = Executable('ls');
+    final result = ls.findSync(ignoreCache: true);
+    expect(result, isNotNull);
+  });
 }

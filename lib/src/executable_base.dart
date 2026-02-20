@@ -9,8 +9,10 @@ class Executable {
   const Executable(this.cmd);
 
   /// Asynchronously finds the path to the executable [cmd].
-  Future<String?> find() async {
-    if (_whichResults.containsKey(cmd)) {
+  ///
+  /// If [ignoreCache] is true, the cache is ignored and the path is searched again.
+  Future<String?> find({bool ignoreCache = false}) async {
+    if (!ignoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
     }
     final result = await which(cmd);
@@ -19,11 +21,16 @@ class Executable {
   }
 
   /// Asynchronously checks if the executable [cmd] exists.
-  Future<bool> exists() async => await find() != null;
+  ///
+  /// If [ignoreCache] is true, the cache is ignored and the path is searched again.
+  Future<bool> exists({bool ignoreCache = false}) async =>
+      await find(ignoreCache: ignoreCache) != null;
 
   /// Synchronously finds the path to the executable [cmd].
-  String? findSync() {
-    if (_whichResults.containsKey(cmd)) {
+  ///
+  /// If [ignoreCache] is true, the cache is ignored and the path is searched again.
+  String? findSync({bool ignoreCache = false}) {
+    if (!ignoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
     }
     final result = whichSync(cmd);
@@ -32,5 +39,8 @@ class Executable {
   }
 
   /// Synchronously checks if the executable [cmd] exists.
-  bool existsSync() => findSync() != null;
+  ///
+  /// If [ignoreCache] is true, the cache is ignored and the path is searched again.
+  bool existsSync({bool ignoreCache = false}) =>
+      findSync(ignoreCache: ignoreCache) != null;
 }
