@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:executable/executable.dart';
 
@@ -12,5 +14,27 @@ void main() {
     final ls = Executable('ls');
     final result = await ls.find();
     expect(result, isNotNull);
+  });
+
+  test('Test executable run', () async {
+    final echo = Executable('echo');
+    final result = await echo.run(['hello']);
+    expect(result.stdout.trim(), 'hello');
+  });
+
+  test('Test executable runSync', () {
+    final echo = Executable('echo');
+    final result = echo.runSync(['hello']);
+    expect(result.stdout.trim(), 'hello');
+  });
+
+  test('Test executable run failure', () async {
+    final random = Executable('random_executable_that_does_not_exist');
+    expect(() async => await random.run([]), throwsA(isA<ProcessException>()));
+  });
+
+  test('Test executable runSync failure', () {
+    final random = Executable('random_executable_that_does_not_exist');
+    expect(() => random.runSync([]), throwsA(isA<ProcessException>()));
   });
 }
