@@ -10,11 +10,21 @@ dart pub add executable
 ```dart
 import 'package:executable/executable.dart';
 
-void main() {
+void main() async {
   final cp = Executable('cp');
   if (cp.existsSync()) {
     final path = cp.findSync();
     print('The path to ${cp.cmd} executable is $path.');
+
+    // Run the executable
+    // Note: This is just an example. Running cp without arguments might fail or hang depending on OS.
+    // Here we assume we want to copy a file.
+    /*
+    final result = await cp.run(['source.txt', 'dest.txt']);
+    if (result.exitCode == 0) {
+      print('Copied successfully.');
+    }
+    */
   } else {
     print('The executable ${cp.cmd} was not found on your system.');
   }
