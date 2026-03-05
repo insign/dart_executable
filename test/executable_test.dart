@@ -13,4 +13,28 @@ void main() {
     final result = await ls.find();
     expect(result, isNotNull);
   });
+
+  test('Test executable run', () async {
+    final echo = Executable('echo');
+    final result = await echo.run(['hello']);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString().trim(), 'hello');
+  });
+
+  test('Test executable runSync', () {
+    final echo = Executable('echo');
+    final result = echo.runSync(['hello']);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString().trim(), 'hello');
+  });
+
+  test('Test executable run exception', () async {
+    final none = Executable('non_existent_executable_123');
+    expect(() => none.run(['test']), throwsA(isA<Exception>()));
+  });
+
+  test('Test executable runSync exception', () {
+    final none = Executable('non_existent_executable_123');
+    expect(() => none.runSync(['test']), throwsA(isA<Exception>()));
+  });
 }
