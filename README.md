@@ -15,6 +15,10 @@ void main() {
   if (cp.existsSync()) {
     final path = cp.findSync();
     print('The path to ${cp.cmd} executable is $path.');
+
+    // You can also run the executable directly
+    final result = cp.runSync(['--version']);
+    print('Output: ${result.stdout}');
   } else {
     print('The executable ${cp.cmd} was not found on your system.');
   }
