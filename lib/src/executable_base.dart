@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:process_run/which.dart';
 
 /// A class for dealing with executables.
@@ -35,4 +37,60 @@ class Executable {
   /// Synchronously checks if the executable [cmd] exists.
   bool existsSync({bool ignoreCache = false}) =>
       findSync(ignoreCache: ignoreCache) != null;
+
+  /// Asynchronously runs the executable with the given [arguments].
+  ///
+  /// Throws a [ProcessException] if the executable path cannot be resolved.
+  Future<ProcessResult> run(
+    List<String> arguments, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
+  }) async {
+    final executablePath = await find();
+    if (executablePath == null) {
+      throw ProcessException(cmd, arguments, 'Executable not found');
+    }
+    return Process.run(
+      executablePath,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
+  /// Synchronously runs the executable with the given [arguments].
+  ///
+  /// Throws a [ProcessException] if the executable path cannot be resolved.
+  ProcessResult runSync(
+    List<String> arguments, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
+  }) {
+    final executablePath = findSync();
+    if (executablePath == null) {
+      throw ProcessException(cmd, arguments, 'Executable not found');
+    }
+    return Process.runSync(
+      executablePath,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
 }
