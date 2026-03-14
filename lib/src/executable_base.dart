@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:process_run/which.dart';
 
 /// A class for dealing with executables.
@@ -35,4 +38,58 @@ class Executable {
   /// Synchronously checks if the executable [cmd] exists.
   bool existsSync({bool ignoreCache = false}) =>
       findSync(ignoreCache: ignoreCache) != null;
+
+  /// Asynchronously runs the executable with the given [args].
+  Future<ProcessResult> run(
+    List<String> args, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
+    bool ignoreCache = false,
+  }) async {
+    final executablePath = await find(ignoreCache: ignoreCache);
+    if (executablePath == null) {
+      throw ProcessException(cmd, args, 'Executable not found', 0);
+    }
+    return Process.run(
+      executablePath,
+      args,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
+  /// Synchronously runs the executable with the given [args].
+  ProcessResult runSync(
+    List<String> args, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
+    bool ignoreCache = false,
+  }) {
+    final executablePath = findSync(ignoreCache: ignoreCache);
+    if (executablePath == null) {
+      throw ProcessException(cmd, args, 'Executable not found', 0);
+    }
+    return Process.runSync(
+      executablePath,
+      args,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
 }
