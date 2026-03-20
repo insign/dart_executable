@@ -75,6 +75,7 @@ class Executable {
   /// Asynchronously runs the executable with the given [arguments].
   Future<ProcessResult> run(
     List<String> arguments, {
+    bool ignoreCache = false,
     String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
@@ -82,7 +83,7 @@ class Executable {
     Encoding? stdoutEncoding = systemEncoding,
     Encoding? stderrEncoding = systemEncoding,
   }) async {
-    final path = await find();
+    final path = await find(ignoreCache: ignoreCache);
     if (path == null) {
       throw ProcessException(cmd, arguments, 'Executable not found.');
     }
@@ -102,6 +103,7 @@ class Executable {
   /// Synchronously runs the executable with the given [arguments].
   ProcessResult runSync(
     List<String> arguments, {
+    bool ignoreCache = false,
     String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
@@ -109,7 +111,7 @@ class Executable {
     Encoding? stdoutEncoding = systemEncoding,
     Encoding? stderrEncoding = systemEncoding,
   }) {
-    final path = findSync();
+    final path = findSync(ignoreCache: ignoreCache);
     if (path == null) {
       throw ProcessException(cmd, arguments, 'Executable not found.');
     }

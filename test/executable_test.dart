@@ -30,6 +30,20 @@ void main() {
     expect(result.stdout.toString().trim(), 'hello');
   });
 
+  test('Test executable run with ignoreCache', () async {
+    final echo = Executable('echo');
+    final result = await echo.run(['hello'], ignoreCache: true);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString().trim(), 'hello');
+  });
+
+  test('Test executable runSync with ignoreCache', () {
+    final echo = Executable('echo');
+    final result = echo.runSync(['hello'], ignoreCache: true);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString().trim(), 'hello');
+  });
+
   test('Test executable run exception', () async {
     final nonexistent = Executable('nonexistent_executable_12345');
     await expectLater(
