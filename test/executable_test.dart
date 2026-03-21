@@ -45,4 +45,56 @@ void main() {
       throwsA(isA<ProcessException>()),
     );
   });
+
+  test('Test executable with custom environment', () async {
+    final tempDir = await Directory.systemTemp.createTemp(
+      'executable_env_test_',
+    );
+    addTearDown(() => tempDir.delete(recursive: true));
+
+    var cmdName = 'custom_env_cmd_12345';
+    if (Platform.isWindows) {
+      cmdName += '.bat';
+    }
+
+    final exePath = '${tempDir.path}${Platform.pathSeparator}$cmdName';
+    final file = File(exePath);
+    if (Platform.isWindows) {
+      await file.writeAsString('@echo off\necho custom_env');
+    } else {
+      await file.writeAsString('#!/bin/sh\necho custom_env');
+      await Process.run('chmod', ['+x', exePath]);
+    }
+
+    final cmdArg = 'custom_env_cmd_12345';
+    final customExecutable = Executable(cmdArg);
+
+    // Should not be found without custom environment
+    final notFoundResult = await customExecutable.find();
+    expect(notFoundResult, isNull);
+
+    // Should be found with custom environment (will bypass cache automatically)
+    final separator = Platform.isWindows ? ';' : ':';
+    final envPath = Platform.environment['PATH'] ?? '';
+    final newPath = '${tempDir.path}$separator$envPath';
+
+    final foundResult = await customExecutable.find(
+      environment: {...Platform.environment, 'PATH': newPath},
+    );
+    expect(foundResult, isNotNull);
+
+    // Cache should not be poisoned: find without custom environment should still return null
+    final notFoundResultAfter = await customExecutable.find();
+    expect(notFoundResultAfter, isNull);
+
+    // Sync find test
+    final syncFoundResult = customExecutable.findSync(
+      environment: {...Platform.environment, 'PATH': newPath},
+    );
+    expect(syncFoundResult, isNotNull);
+
+    // Cache should not be poisoned: findSync without custom environment should still return null
+    final syncNotFoundResultAfter = customExecutable.findSync();
+    expect(syncNotFoundResultAfter, isNull);
+  });
 }
