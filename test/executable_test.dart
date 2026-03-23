@@ -45,4 +45,58 @@ void main() {
       throwsA(isA<ProcessException>()),
     );
   });
+
+  test('Test executable environment variables in find', () async {
+    final tempDir = Directory.systemTemp.createTempSync('executable_test_');
+    try {
+      final dummyExecutableName =
+          'dummy_executable_test_${DateTime.now().millisecondsSinceEpoch}${Platform.isWindows ? '.bat' : ''}';
+      final dummyExecutablePath = '${tempDir.path}/$dummyExecutableName';
+      final dummyExecutable = File(dummyExecutablePath);
+
+      if (Platform.isWindows) {
+        dummyExecutable.writeAsStringSync('@echo off\necho hello');
+      } else {
+        dummyExecutable.writeAsStringSync('#!/bin/sh\necho hello');
+        Process.runSync('chmod', ['+x', dummyExecutablePath]);
+      }
+
+      final exec = Executable(dummyExecutableName);
+
+      // Deve falhar, não está no PATH global
+      final resultGlobal = await exec.find();
+      expect(resultGlobal, isNull);
+
+      // Deve achar, pois passamos o ambiente correto
+      final env = {'PATH': tempDir.path};
+      final resultEnv = await exec.find(
+        environment: env,
+        includeParentEnvironment: false,
+      );
+      expect(resultEnv, isNotNull);
+
+      final resultEnvSync = exec.findSync(
+        environment: env,
+        includeParentEnvironment: false,
+      );
+      expect(resultEnvSync, isNotNull);
+
+      // Testar execução
+      final runResult = await exec.run(
+        [],
+        environment: env,
+        includeParentEnvironment: false,
+      );
+      expect(runResult.exitCode, 0);
+
+      final runSyncResult = exec.runSync(
+        [],
+        environment: env,
+        includeParentEnvironment: false,
+      );
+      expect(runSyncResult.exitCode, 0);
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
 }
