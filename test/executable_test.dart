@@ -45,4 +45,50 @@ void main() {
       throwsA(isA<ProcessException>()),
     );
   });
+
+  test('Test executable with custom environment', () async {
+    final tempDir = Directory.systemTemp.createTempSync('exec_test');
+    final tempFile = File('${tempDir.path}/my_dummy_exec');
+    tempFile.writeAsStringSync('#!/bin/sh\necho "dummy"');
+
+    // Make it executable on POSIX systems
+    if (!Platform.isWindows) {
+      Process.runSync('chmod', ['+x', tempFile.path]);
+    }
+
+    final exec = Executable('my_dummy_exec');
+
+    // Without custom environment, it should fail
+    await expectLater(
+      () => exec.run([], includeParentEnvironment: false),
+      throwsA(isA<ProcessException>()),
+    );
+
+    // With custom environment containing tempDir in PATH, it should succeed
+    final env = {'PATH': tempDir.path};
+
+    if (!Platform.isWindows) {
+      final result = await exec.run(
+        [],
+        environment: env,
+        includeParentEnvironment: false,
+      );
+      expect(result.exitCode, 0);
+      expect(result.stdout.toString().trim(), 'dummy');
+    }
+
+    // Synchronous execution test
+    if (!Platform.isWindows) {
+      final resultSync = exec.runSync(
+        [],
+        environment: env,
+        includeParentEnvironment: false,
+      );
+      expect(resultSync.exitCode, 0);
+      expect(resultSync.stdout.toString().trim(), 'dummy');
+    }
+
+    // Clean up
+    tempDir.deleteSync(recursive: true);
+  });
 }
