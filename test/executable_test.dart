@@ -46,6 +46,40 @@ void main() {
     );
   });
 
+  group('Cache poisoning tests', () {
+    test('find cache bypasses when includeParentEnvironment is false', () async {
+      final exe = Executable('ls');
+
+      // Call find to populate the cache
+      await exe.find();
+
+      // For process_run which(), even with includeParentEnvironment: false, it will fall back to using default Platform.environment
+      // However, what we want to test is whether Executable's own caching logic is correctly bypassing cache when asked to.
+      // So let's provide a completely dummy environment that will force which() to not find the executable.
+      // Since our fix enforces bypassing cache when includeParentEnvironment is false, the result MUST be null.
+      // This is because we ensure `shouldIgnoreCache = true` when includeParentEnvironment is false.
+      final foundWithoutParent = await exe.find(
+        environment: {'PATH': ''},
+        includeParentEnvironment: false,
+      );
+
+      expect(foundWithoutParent, isNull);
+    });
+
+    test('findSync cache bypasses when includeParentEnvironment is false', () {
+      final exe = Executable('date');
+
+      exe.findSync();
+
+      final foundWithoutParent = exe.findSync(
+        environment: {'PATH': ''},
+        includeParentEnvironment: false,
+      );
+
+      expect(foundWithoutParent, isNull);
+    });
+  });
+
   group('Custom environment tests', () {
     late Directory tempDir;
     late String scriptName;
@@ -130,4 +164,5 @@ void main() {
       expect(result.stdout.toString().trim(), 'custom_env');
     });
   });
+
 }

@@ -20,7 +20,8 @@ class Executable {
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
   }) async {
-    final shouldIgnoreCache = ignoreCache || environment != null;
+    final shouldIgnoreCache =
+        ignoreCache || environment != null || !includeParentEnvironment;
 
     if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
@@ -71,7 +72,8 @@ class Executable {
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
   }) {
-    final shouldIgnoreCache = ignoreCache || environment != null;
+    final shouldIgnoreCache =
+        ignoreCache || environment != null || !includeParentEnvironment;
 
     if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
