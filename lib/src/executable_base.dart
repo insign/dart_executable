@@ -15,8 +15,15 @@ class Executable {
       cmd.contains('/') || (Platform.isWindows && cmd.contains('\\'));
 
   /// Asynchronously finds the path to the executable [cmd].
-  Future<String?> find({bool ignoreCache = false}) async {
-    if (!ignoreCache && _whichResults.containsKey(cmd)) {
+  Future<String?> find({
+    bool ignoreCache = false,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+  }) async {
+    final shouldIgnoreCache =
+        ignoreCache || environment != null || !includeParentEnvironment;
+
+    if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
     }
 
@@ -34,18 +41,41 @@ class Executable {
       }
     }
 
-    result ??= await which(cmd);
-    _whichResults[cmd] = result;
+    result ??= await which(
+      cmd,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+    );
+
+    if (!shouldIgnoreCache) {
+      _whichResults[cmd] = result;
+    }
     return result;
   }
 
   /// Asynchronously checks if the executable [cmd] exists.
-  Future<bool> exists({bool ignoreCache = false}) async =>
-      await find(ignoreCache: ignoreCache) != null;
+  Future<bool> exists({
+    bool ignoreCache = false,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+  }) async =>
+      await find(
+        ignoreCache: ignoreCache,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+      ) !=
+      null;
 
   /// Synchronously finds the path to the executable [cmd].
-  String? findSync({bool ignoreCache = false}) {
-    if (!ignoreCache && _whichResults.containsKey(cmd)) {
+  String? findSync({
+    bool ignoreCache = false,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+  }) {
+    final shouldIgnoreCache =
+        ignoreCache || environment != null || !includeParentEnvironment;
+
+    if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
     }
 
@@ -63,14 +93,30 @@ class Executable {
       }
     }
 
-    result ??= whichSync(cmd);
-    _whichResults[cmd] = result;
+    result ??= whichSync(
+      cmd,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+    );
+
+    if (!shouldIgnoreCache) {
+      _whichResults[cmd] = result;
+    }
     return result;
   }
 
   /// Synchronously checks if the executable [cmd] exists.
-  bool existsSync({bool ignoreCache = false}) =>
-      findSync(ignoreCache: ignoreCache) != null;
+  bool existsSync({
+    bool ignoreCache = false,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+  }) =>
+      findSync(
+        ignoreCache: ignoreCache,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+      ) !=
+      null;
 
   /// Asynchronously runs the executable with the given [arguments].
   Future<ProcessResult> run(
@@ -83,7 +129,11 @@ class Executable {
     Encoding? stdoutEncoding = systemEncoding,
     Encoding? stderrEncoding = systemEncoding,
   }) async {
-    final path = await find(ignoreCache: ignoreCache);
+    final path = await find(
+      ignoreCache: ignoreCache,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+    );
     if (path == null) {
       throw ProcessException(cmd, arguments, 'Executable not found.');
     }
@@ -111,7 +161,11 @@ class Executable {
     Encoding? stdoutEncoding = systemEncoding,
     Encoding? stderrEncoding = systemEncoding,
   }) {
-    final path = findSync(ignoreCache: ignoreCache);
+    final path = findSync(
+      ignoreCache: ignoreCache,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+    );
     if (path == null) {
       throw ProcessException(cmd, arguments, 'Executable not found.');
     }
