@@ -121,6 +121,7 @@ class Executable {
   /// Asynchronously runs the executable with the given [arguments].
   Future<ProcessResult> run(
     List<String> arguments, {
+    bool ignoreCache = false,
     String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
@@ -129,6 +130,7 @@ class Executable {
     Encoding? stderrEncoding = systemEncoding,
   }) async {
     final path = await find(
+      ignoreCache: ignoreCache,
       environment: environment,
       includeParentEnvironment: includeParentEnvironment,
     );
@@ -151,6 +153,7 @@ class Executable {
   /// Synchronously runs the executable with the given [arguments].
   ProcessResult runSync(
     List<String> arguments, {
+    bool ignoreCache = false,
     String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
@@ -159,6 +162,7 @@ class Executable {
     Encoding? stderrEncoding = systemEncoding,
   }) {
     final path = findSync(
+      ignoreCache: ignoreCache,
       environment: environment,
       includeParentEnvironment: includeParentEnvironment,
     );
