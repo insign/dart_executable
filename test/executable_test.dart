@@ -46,6 +46,75 @@ void main() {
     );
   });
 
+  group('ignoreCache tests for run and runSync', () {
+    late Directory tempDir;
+
+    setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp('executable_cache_test_');
+    });
+
+    tearDown(() async {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('run bypasses cache when ignoreCache is true', () async {
+      var scriptName = Platform.isWindows ? 'dummy.bat' : 'dummy.sh';
+      var exePath = '${tempDir.path}${Platform.pathSeparator}$scriptName';
+      var exe = Executable(exePath);
+
+      // 1. Initially it doesn't exist. Find it so it caches 'null'
+      var initialFound = await exe.find();
+      expect(initialFound, isNull);
+
+      // 2. Now create the executable
+      var file = File(exePath);
+      if (Platform.isWindows) {
+        await file.writeAsString('@echo off\necho ignore_cache_run');
+      } else {
+        await file.writeAsString('#!/bin/sh\necho ignore_cache_run');
+        await Process.run('chmod', ['+x', exePath]);
+      }
+
+      // 3. run without ignoreCache should throw ProcessException
+      // because find() reads from cache and returns null
+      await expectLater(() => exe.run([]), throwsA(isA<ProcessException>()));
+
+      // 4. run with ignoreCache: true should work
+      var result = await exe.run([], ignoreCache: true);
+      expect(result.exitCode, 0);
+      expect(result.stdout.toString().trim(), 'ignore_cache_run');
+    });
+
+    test('runSync bypasses cache when ignoreCache is true', () async {
+      var scriptName = Platform.isWindows ? 'dummy_sync.bat' : 'dummy_sync.sh';
+      var exePath = '${tempDir.path}${Platform.pathSeparator}$scriptName';
+      var exe = Executable(exePath);
+
+      // 1. Initially it doesn't exist. Find it so it caches 'null'
+      var initialFound = exe.findSync();
+      expect(initialFound, isNull);
+
+      // 2. Now create the executable
+      var file = File(exePath);
+      if (Platform.isWindows) {
+        await file.writeAsString('@echo off\necho ignore_cache_run_sync');
+      } else {
+        await file.writeAsString('#!/bin/sh\necho ignore_cache_run_sync');
+        await Process.run('chmod', ['+x', exePath]);
+      }
+
+      // 3. runSync without ignoreCache should throw ProcessException
+      expect(() => exe.runSync([]), throwsA(isA<ProcessException>()));
+
+      // 4. runSync with ignoreCache: true should work
+      var result = exe.runSync([], ignoreCache: true);
+      expect(result.exitCode, 0);
+      expect(result.stdout.toString().trim(), 'ignore_cache_run_sync');
+    });
+  });
+
   group('Cache poisoning tests', () {
     test('find cache bypasses when includeParentEnvironment is false', () async {
       final exe = Executable('ls');
@@ -164,5 +233,4 @@ void main() {
       expect(result.stdout.toString().trim(), 'custom_env');
     });
   });
-
 }
