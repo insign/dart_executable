@@ -233,4 +233,74 @@ void main() {
       expect(result.stdout.toString().trim(), 'custom_env');
     });
   });
+
+  group('workingDirectory tests', () {
+    late Directory tempDir;
+    late String scriptName;
+    late String relativeExecutablePath;
+
+    setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp(
+        'executable_workdir_test_',
+      );
+      scriptName = Platform.isWindows
+          ? 'workdir_script.bat'
+          : 'workdir_script.sh';
+      relativeExecutablePath = '.${Platform.pathSeparator}$scriptName';
+      final file = File('${tempDir.path}${Platform.pathSeparator}$scriptName');
+
+      if (Platform.isWindows) {
+        await file.writeAsString('@echo off\necho workdir_success');
+      } else {
+        await file.writeAsString('#!/bin/sh\necho workdir_success');
+        await Process.run('chmod', ['+x', file.path]);
+      }
+    });
+
+    tearDown(() async {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('Test find with workingDirectory', () async {
+      final exe = Executable(relativeExecutablePath);
+      final found = await exe.find(workingDirectory: tempDir.path);
+      expect(found, isNotNull);
+      expect(File(found!).existsSync(), isTrue);
+    });
+
+    test('Test findSync with workingDirectory', () {
+      final exe = Executable(relativeExecutablePath);
+      final found = exe.findSync(workingDirectory: tempDir.path);
+      expect(found, isNotNull);
+      expect(File(found!).existsSync(), isTrue);
+    });
+
+    test('Test exists with workingDirectory', () async {
+      final exe = Executable(relativeExecutablePath);
+      final exists = await exe.exists(workingDirectory: tempDir.path);
+      expect(exists, isTrue);
+    });
+
+    test('Test existsSync with workingDirectory', () {
+      final exe = Executable(relativeExecutablePath);
+      final exists = exe.existsSync(workingDirectory: tempDir.path);
+      expect(exists, isTrue);
+    });
+
+    test('Test run with workingDirectory', () async {
+      final exe = Executable(relativeExecutablePath);
+      final result = await exe.run([], workingDirectory: tempDir.path);
+      expect(result.exitCode, 0);
+      expect(result.stdout.toString().trim(), 'workdir_success');
+    });
+
+    test('Test runSync with workingDirectory', () {
+      final exe = Executable(relativeExecutablePath);
+      final result = exe.runSync([], workingDirectory: tempDir.path);
+      expect(result.exitCode, 0);
+      expect(result.stdout.toString().trim(), 'workdir_success');
+    });
+  });
 }
