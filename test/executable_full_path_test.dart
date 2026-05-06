@@ -84,9 +84,11 @@ void main() {
         final found = await executable.find();
 
         expect(found, isNotNull);
+        // Compare checking if the real paths are matching, since p.normalize removes './'
+        // and File('./').absolute retains it.
         expect(
-          File(found!).absolute.path,
-          equals(File(relativePath).absolute.path),
+          File(found!).resolveSymbolicLinksSync(),
+          equals(File(relativePath).absolute.resolveSymbolicLinksSync()),
         );
       } finally {
         Directory.current = originalCwd;
