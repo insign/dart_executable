@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:process_run/which.dart';
 
 /// A class for dealing with executables.
@@ -17,11 +18,15 @@ class Executable {
   /// Asynchronously finds the path to the executable [cmd].
   Future<String?> find({
     bool ignoreCache = false,
+    String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
   }) async {
     final shouldIgnoreCache =
-        ignoreCache || environment != null || !includeParentEnvironment;
+        ignoreCache ||
+        environment != null ||
+        workingDirectory != null ||
+        !includeParentEnvironment;
 
     if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
@@ -29,7 +34,10 @@ class Executable {
 
     String? result;
     if (_isPath) {
-      final file = File(cmd);
+      final filePath = workingDirectory != null
+          ? p.join(workingDirectory, cmd)
+          : cmd;
+      final file = File(filePath);
       if (await file.exists()) {
         if (Platform.isWindows) {
           if (_isWindowsExecutable(cmd)) {
@@ -56,11 +64,13 @@ class Executable {
   /// Asynchronously checks if the executable [cmd] exists.
   Future<bool> exists({
     bool ignoreCache = false,
+    String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
   }) async =>
       await find(
         ignoreCache: ignoreCache,
+        workingDirectory: workingDirectory,
         environment: environment,
         includeParentEnvironment: includeParentEnvironment,
       ) !=
@@ -69,11 +79,15 @@ class Executable {
   /// Synchronously finds the path to the executable [cmd].
   String? findSync({
     bool ignoreCache = false,
+    String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
   }) {
     final shouldIgnoreCache =
-        ignoreCache || environment != null || !includeParentEnvironment;
+        ignoreCache ||
+        environment != null ||
+        workingDirectory != null ||
+        !includeParentEnvironment;
 
     if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
       return _whichResults[cmd];
@@ -81,7 +95,10 @@ class Executable {
 
     String? result;
     if (_isPath) {
-      final file = File(cmd);
+      final filePath = workingDirectory != null
+          ? p.join(workingDirectory, cmd)
+          : cmd;
+      final file = File(filePath);
       if (file.existsSync()) {
         if (Platform.isWindows) {
           if (_isWindowsExecutable(cmd)) {
@@ -108,11 +125,13 @@ class Executable {
   /// Synchronously checks if the executable [cmd] exists.
   bool existsSync({
     bool ignoreCache = false,
+    String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
   }) =>
       findSync(
         ignoreCache: ignoreCache,
+        workingDirectory: workingDirectory,
         environment: environment,
         includeParentEnvironment: includeParentEnvironment,
       ) !=
@@ -131,6 +150,7 @@ class Executable {
   }) async {
     final path = await find(
       ignoreCache: ignoreCache,
+      workingDirectory: workingDirectory,
       environment: environment,
       includeParentEnvironment: includeParentEnvironment,
     );
@@ -163,6 +183,7 @@ class Executable {
   }) {
     final path = findSync(
       ignoreCache: ignoreCache,
+      workingDirectory: workingDirectory,
       environment: environment,
       includeParentEnvironment: includeParentEnvironment,
     );

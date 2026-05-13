@@ -93,6 +93,41 @@ void main() {
       }
     });
 
+    test('finds executable by relative path using workingDirectory', () async {
+      final relativePath = '.${Platform.pathSeparator}$scriptName';
+      final executable = Executable(relativePath);
+      final found = await executable.find(workingDirectory: tempDir.path);
+
+      expect(found, isNotNull);
+      expect(
+        File(found!).absolute.path,
+        equals(
+          File(
+            '${tempDir.path}${Platform.pathSeparator}$relativePath',
+          ).absolute.path,
+        ),
+      );
+    });
+
+    test(
+      'findSync finds executable by relative path using workingDirectory',
+      () {
+        final relativePath = '.${Platform.pathSeparator}$scriptName';
+        final executable = Executable(relativePath);
+        final found = executable.findSync(workingDirectory: tempDir.path);
+
+        expect(found, isNotNull);
+        expect(
+          File(found!).absolute.path,
+          equals(
+            File(
+              '${tempDir.path}${Platform.pathSeparator}$relativePath',
+            ).absolute.path,
+          ),
+        );
+      },
+    );
+
     test('returns null for non-executable extension on Windows', () async {
       if (!Platform.isWindows) {
         return;
