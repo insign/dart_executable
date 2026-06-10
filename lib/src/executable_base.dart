@@ -15,6 +15,13 @@ class Executable {
   bool get _isPath =>
       cmd.contains('/') || (Platform.isWindows && cmd.contains('\\'));
 
+  String _getCacheKey(String? workingDirectory) {
+    if (_isPath && !p.isAbsolute(cmd)) {
+      return p.join(workingDirectory ?? Directory.current.path, cmd);
+    }
+    return cmd;
+  }
+
   /// Asynchronously finds the path to the executable [cmd].
   Future<String?> find({
     bool ignoreCache = false,
@@ -28,8 +35,10 @@ class Executable {
         workingDirectory != null ||
         !includeParentEnvironment;
 
-    if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
-      return _whichResults[cmd];
+    final cacheKey = _getCacheKey(workingDirectory);
+
+    if (!shouldIgnoreCache && _whichResults.containsKey(cacheKey)) {
+      return _whichResults[cacheKey];
     }
 
     String? result;
@@ -56,7 +65,7 @@ class Executable {
     );
 
     if (!shouldIgnoreCache) {
-      _whichResults[cmd] = result;
+      _whichResults[cacheKey] = result;
     }
     return result;
   }
@@ -89,8 +98,10 @@ class Executable {
         workingDirectory != null ||
         !includeParentEnvironment;
 
-    if (!shouldIgnoreCache && _whichResults.containsKey(cmd)) {
-      return _whichResults[cmd];
+    final cacheKey = _getCacheKey(workingDirectory);
+
+    if (!shouldIgnoreCache && _whichResults.containsKey(cacheKey)) {
+      return _whichResults[cacheKey];
     }
 
     String? result;
@@ -117,7 +128,7 @@ class Executable {
     );
 
     if (!shouldIgnoreCache) {
-      _whichResults[cmd] = result;
+      _whichResults[cacheKey] = result;
     }
     return result;
   }
