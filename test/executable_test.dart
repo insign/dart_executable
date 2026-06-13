@@ -116,6 +116,68 @@ void main() {
   });
 
   group('Cache poisoning tests', () {
+    test('relative path cache poisoning when CWD changes', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'executable_cwd_test_',
+      );
+      final dirA = Directory('${tempDir.path}/A')..createSync();
+      final dirB = Directory('${tempDir.path}/B')..createSync();
+
+      final scriptName = Platform.isWindows ? 'script.bat' : 'script.sh';
+      final relativeCmd = './$scriptName';
+
+      final scriptA = File('${dirA.path}/$scriptName');
+      final scriptB = File('${dirB.path}/$scriptName');
+
+      if (Platform.isWindows) {
+        await scriptA.writeAsString('@echo off\necho A');
+        await scriptB.writeAsString('@echo off\necho B');
+      } else {
+        await scriptA.writeAsString('#!/bin/sh\necho A');
+        await Process.run('chmod', ['+x', scriptA.path]);
+        await scriptB.writeAsString('#!/bin/sh\necho B');
+        await Process.run('chmod', ['+x', scriptB.path]);
+      }
+
+      final originalCwd = Directory.current;
+
+      try {
+        Directory.current = dirA;
+        final exe = Executable(relativeCmd);
+        final pathA = await exe.find();
+        expect(pathA, isNotNull);
+        expect(
+          pathA,
+          endsWith(
+            'A${Platform.pathSeparator}.${Platform.pathSeparator}$scriptName',
+          ),
+        );
+
+        Directory.current = dirB;
+        final pathB = await exe.find();
+        expect(pathB, isNotNull);
+        expect(
+          pathB,
+          endsWith(
+            'B${Platform.pathSeparator}.${Platform.pathSeparator}$scriptName',
+          ),
+        );
+
+        // Test run
+        final resultB = await exe.run([]);
+        expect(resultB.stdout.toString().trim(), 'B');
+
+        Directory.current = dirA;
+        final resultA = exe.runSync([]);
+        expect(resultA.stdout.toString().trim(), 'A');
+      } finally {
+        Directory.current = originalCwd;
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      }
+    });
+
     test('find cache bypasses when includeParentEnvironment is false', () async {
       final exe = Executable('ls');
 
