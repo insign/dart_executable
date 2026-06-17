@@ -32,7 +32,6 @@ class Executable {
     final shouldIgnoreCache =
         ignoreCache ||
         environment != null ||
-        workingDirectory != null ||
         !includeParentEnvironment;
 
     final cacheKey = _getCacheKey(workingDirectory);
@@ -95,7 +94,6 @@ class Executable {
     final shouldIgnoreCache =
         ignoreCache ||
         environment != null ||
-        workingDirectory != null ||
         !includeParentEnvironment;
 
     final cacheKey = _getCacheKey(workingDirectory);
