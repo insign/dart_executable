@@ -30,10 +30,7 @@ class Executable {
     bool includeParentEnvironment = true,
   }) async {
     final shouldIgnoreCache =
-        ignoreCache ||
-        environment != null ||
-        workingDirectory != null ||
-        !includeParentEnvironment;
+        ignoreCache || environment != null || !includeParentEnvironment;
 
     final cacheKey = _getCacheKey(workingDirectory);
 
@@ -93,10 +90,7 @@ class Executable {
     bool includeParentEnvironment = true,
   }) {
     final shouldIgnoreCache =
-        ignoreCache ||
-        environment != null ||
-        workingDirectory != null ||
-        !includeParentEnvironment;
+        ignoreCache || environment != null || !includeParentEnvironment;
 
     final cacheKey = _getCacheKey(workingDirectory);
 
