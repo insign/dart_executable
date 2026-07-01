@@ -46,6 +46,21 @@ void main() {
     );
   });
 
+  test('Test executable start', () async {
+    final echo = Executable('echo');
+    final process = await echo.start(['hello']);
+    final exitCode = await process.exitCode;
+    expect(exitCode, 0);
+  });
+
+  test('Test executable start exception', () async {
+    final nonexistent = Executable('nonexistent_executable_12345');
+    await expectLater(
+      () => nonexistent.start(['test']),
+      throwsA(isA<ProcessException>()),
+    );
+  });
+
   group('ignoreCache tests for run and runSync', () {
     late Directory tempDir;
 
