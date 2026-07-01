@@ -148,6 +148,37 @@ class Executable {
       ) !=
       null;
 
+  /// Asynchronously starts the executable with the given [arguments].
+  Future<Process> start(
+    List<String> arguments, {
+    bool ignoreCache = false,
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) async {
+    final path = await find(
+      ignoreCache: ignoreCache,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+    );
+    if (path == null) {
+      throw ProcessException(cmd, arguments, 'Executable not found.');
+    }
+
+    return Process.start(
+      path,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      mode: mode,
+    );
+  }
+
   /// Asynchronously runs the executable with the given [arguments].
   Future<ProcessResult> run(
     List<String> arguments, {
