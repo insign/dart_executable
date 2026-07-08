@@ -30,6 +30,34 @@ void main() {
     expect(result.stdout.toString().trim(), 'hello');
   });
 
+  test('Test executable start', () async {
+    final echo = Executable('echo');
+    final process = await echo.start(['hello_start']);
+    final stdoutStream = process.stdout;
+    final stderrStream = process.stderr;
+
+    // We can read stdout
+    final stdoutFuture = systemEncoding.decoder.bind(stdoutStream).join();
+    final stderrFuture = systemEncoding.decoder.bind(stderrStream).join();
+
+    final exitCode = await process.exitCode;
+    expect(exitCode, 0);
+
+    final stdoutString = await stdoutFuture;
+    final stderrString = await stderrFuture;
+
+    expect(stdoutString.trim(), 'hello_start');
+    expect(stderrString.trim(), isEmpty);
+  });
+
+  test('Test executable start exception', () async {
+    final nonexistent = Executable('nonexistent_executable_12345');
+    await expectLater(
+      () => nonexistent.start(['test']),
+      throwsA(isA<ProcessException>()),
+    );
+  });
+
   test('Test executable run exception', () async {
     final nonexistent = Executable('nonexistent_executable_12345');
     await expectLater(
